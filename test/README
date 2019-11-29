@@ -1,25 +1,2 @@
-Recommended Operating System: Ubuntu 16.04
-
-1) Install anaconda  https://www.anaconda.com/distribution/#download-section
-2) Install the following packages using conda via e.g. anaconda prompt:
-	a) PyTorch https://pytorch.org/get-started/locally/
-	b) Matplotlib
-	c) Numpy
-	d) mlxtend
-3) Start Jupyter Notebook
-4) Navigate to the exercises:
-	Exercise1.ipynb
-	Exercise1.ipynb
-Have fun.
-
-!!!Don't forget to save the jupyter notebooks before submitting!!!
-
-Submission:
-
-Deadline: 20.12.2019 12pm
-
-1) Compress the complete Assignment1 directory (without MNIST datasets!!!!) to a zip file. (Your file should not be more than 30kb, otherwise you did something wrong)
-2) Send your compressed directory to info2@ima-ifu.rwth-aachen.de
-
 
 
