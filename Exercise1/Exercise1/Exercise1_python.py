@@ -17,7 +17,6 @@
 # The input data (X) with the associated labels (y) as well as the weights and biases 
 # are initialized with random numbers. A seed is set to make your results comparable.
 
-# this is a test (Freddy)
 import numpy as np
 import matplotlib.pyplot as plt
 from nn import TwoLayerNet
