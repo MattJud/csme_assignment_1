@@ -74,12 +74,29 @@ class TwoLayerNet(object):
             # Use the weights and biases to perform a forward propagation and store the results
             # in the scores variable, which should be an array of shape (N, C).
             # Start with a naive implementation with at least 2 loops.
-        
-            ######################################## START OF YOUR CODE ########################################
-
-            pass #to be replaced by your code
-        
-            ######################################## END OF YOUR CODE ##########################################
+            
+            # get number of classes
+            C = b2.size
+            scores = np.array([N, C])
+            
+            # create output after first weights
+            x1 = np.zeros([W1.shape[1], N])           
+            for i in range(N):
+                x1[:, i] = W1.T.dot(X[i].T) + b1
+            
+            # apply ReLU
+            # @All: don't know if that is correct, as ReLU is not mention in the task 1.1,
+            #       but in the description, at the very top
+            ReLU = lambda x: np.max([0,x])
+            vectorized_ReLU = np.vectorize(ReLU)
+            x1 = vectorized_ReLU(x1)
+            
+            #calculate network output (scores)
+            x2 = np.zeros([W2.shape[1], N])
+            for i in range(N):
+                x2[:, i] = W2.T.dot(x1[:, i]) + b2
+            
+            scores = x2.T
             
         else:
             
@@ -87,6 +104,9 @@ class TwoLayerNet(object):
             # Now implement the same forward propagation as you did above using no loops.
             # If you are done set the parameter loops to False to test your code. 
         
+        
+            # @All: Not quite sure if the solution of Task 1.1 should go into here, cause I don#t know how to
+            #       do it without any loops, as we have 5 samples.
             ######################################## START OF YOUR CODE ########################################
 
             pass  # to be replaced by your code
