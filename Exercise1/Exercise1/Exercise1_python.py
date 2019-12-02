@@ -105,6 +105,9 @@ print(np.sum(np.abs(loss - correct_loss)))
 # 
 # Please describe the two main issues that can lead to numerical instability when using the softmax function? Describe a/your approach of avoiding instabilities with softmax.
 
+# @All: Issues are exploding or vanishing class scores. solution --> add a constant to the function (see link below)
+# https://eulertech.wordpress.com/2017/10/09/numerical-instability-in-deep-learning-with-softmax/
+
 # # Back propagation
 # Now implement the Back propagation in 'nn.py' (Task 3) in the loss_grad function.
 # Test the code below to check your results.

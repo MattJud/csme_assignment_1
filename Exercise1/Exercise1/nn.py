@@ -65,7 +65,7 @@ class TwoLayerNet(object):
         #--------------------------------------- forward propagation ---------------------------------------                     
         
         scores = None
-        loops = True
+        loops = False
         
         if loops == True:
             
@@ -74,24 +74,20 @@ class TwoLayerNet(object):
             # Use the weights and biases to perform a forward propagation and store the results
             # in the scores variable, which should be an array of shape (N, C).
             # Start with a naive implementation with at least 2 loops.
-            
-            # get number of classes
-            C = b2.size
-            scores = np.array([N, C])
-            
+
+            # @All: Not quite sure, if they meant this with at least 2 loops. (Freddy)
+
             # create output after first weights
             x1 = np.zeros([W1.shape[1], N])           
             for i in range(N):
                 x1[:, i] = W1.T.dot(X[i].T) + b1
             
             # apply ReLU
-            # @All: don't know if that is correct, as ReLU is not mention in the task 1.1,
-            #       but in the description, at the very top
             ReLU = lambda x: np.max([0,x])
             vectorized_ReLU = np.vectorize(ReLU)
             x1 = vectorized_ReLU(x1)
             
-            #calculate network output (scores)
+            # calculate network output (scores)
             x2 = np.zeros([W2.shape[1], N])
             for i in range(N):
                 x2[:, i] = W2.T.dot(x1[:, i]) + b2
@@ -102,16 +98,32 @@ class TwoLayerNet(object):
             
             # Task 1.2:
             # Now implement the same forward propagation as you did above using no loops.
-            # If you are done set the parameter loops to False to test your code. 
-        
-        
-            # @All: Not quite sure if the solution of Task 1.1 should go into here, cause I don#t know how to
-            #       do it without any loops, as we have 5 samples.
-            ######################################## START OF YOUR CODE ########################################
+            # If you are done set the parameter loops to False to test your code.
 
-            pass  # to be replaced by your code
-        
-            ######################################## END OF YOUR CODE ##########################################
+            # create output after first weights, separately for each sample
+            x1 = np.zeros([W1.shape[1], N])
+
+            x1[:, 0] = W1.T.dot(X[0].T) + b1
+            x1[:, 1] = W1.T.dot(X[1].T) + b1
+            x1[:, 2] = W1.T.dot(X[2].T) + b1
+            x1[:, 3] = W1.T.dot(X[3].T) + b1
+            x1[:, 4] = W1.T.dot(X[4].T) + b1
+
+            # apply ReLU
+            relu = lambda x: np.max([0, x])
+            vectorized_ReLU = np.vectorize(relu)
+            x1 = vectorized_ReLU(x1)
+
+            # calculate network output (scores), separately for each sample
+            x2 = np.zeros([W2.shape[1], N])
+
+            x2[:, 0] = W2.T.dot(x1[:, 0]) + b2
+            x2[:, 1] = W2.T.dot(x1[:, 1]) + b2
+            x2[:, 2] = W2.T.dot(x1[:, 2]) + b2
+            x2[:, 3] = W2.T.dot(x1[:, 3]) + b2
+            x2[:, 4] = W2.T.dot(x1[:, 4]) + b2
+
+            scores = x2.T
 
         # Jump out if y is not given.
         if y is None:
@@ -124,18 +136,45 @@ class TwoLayerNet(object):
         # Task 2:
         # Compute the loss with softmax and store it in the variable loss. Include L2 regularization for W1 and W2.
         # Make sure to handle numerical instabilities.
-        
-        ######################################## START OF YOUR CODE ########################################
 
-        pass  # to be replaced by your code
-        
-        ######################################## END OF YOUR CODE ##########################################
+        # @All: - see lecture 4 from slide 40
+        #       - no idea what is meant with "handle numerical instabilities"
+        #       - see: https://eulertech.wordpress.com/2017/10/09/numerical-instability-in-deep-learning-with-softmax/
+
+        # function to calculate a stable softmax of a given array
+        def softmax_stable(x):
+            e_res = np.exp(x) - np.exp(max(x))
+            return e_res / np.sum(e_res)
+
+        # function to calculate normal softmax of a given array
+        def softmax(x):
+            e_res = np.exp(x)
+            return e_res / np.sum(e_res)
+
+        # number of classes
+        C = b2.size
+
+        # calculate softmax of class scores
+        sm_results = np.zeros([N, C])
+        for i in range(N):
+            sm_results[i] = softmax(scores[i])
+
+        # calculate L2-Norm for both weight matrices
+        l2_w1 = sum(sum(np.square(x) for x in W1))
+        l2_w2 = sum(sum(np.square(x) for x in W2))
+
+        # calculate single losses
+        losses = np.zeros(N)
+        for i in range(N):
+            losses[i] = - np.log(np.exp(sm_results[i, y[i]]) / sum(np.exp(sm_results[i, k]) for k in range(C)))
+
+        loss = 1/N * sum(x for x in losses) + reg * (l2_w1 + l2_w2)
 
         #--------------------------------------- back propagation -------------------------------------------
         
         grads = {}
 
-        # Task 3: 
+        # Task 3:
         # Compute the derivatives of the weights and biases (back propagation).
         # Store the results in the grads dictionary, where 'W1' referes to the gradient of W1 etc.
         

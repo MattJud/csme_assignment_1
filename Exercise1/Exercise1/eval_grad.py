@@ -1,6 +1,6 @@
 import numpy as np
 from random import randrange
-# this is a test (Freddy)
+
 def numerical_grad(f, x, verbose=True, h=0.00001):
     """
     This is a function to calculate a numerical gradient.
