@@ -75,7 +75,8 @@ class TwoLayerNet(object):
             # in the scores variable, which should be an array of shape (N, C).
             # Start with a naive implementation with at least 2 loops.
 
-            # @All: Not quite sure, if they meant this with at least 2 loops. (Freddy)
+            # @All: I asked the lecturer and he said we should use 2 loops for each layer, so probably no matrix
+            #       calculation. (Freddy)
 
             # create output after first weights
             x1 = np.zeros([W1.shape[1], N])           
@@ -138,12 +139,11 @@ class TwoLayerNet(object):
         # Make sure to handle numerical instabilities.
 
         # @All: - see lecture 4 from slide 40
-        #       - no idea what is meant with "handle numerical instabilities"
-        #       - see: https://eulertech.wordpress.com/2017/10/09/numerical-instability-in-deep-learning-with-softmax/
+        #       - see: https://deepnotes.io/softmax-crossentropy
 
-        # function to calculate a stable softmax of a given array
+        # function to calculate a stable softmax of a given array (handle numerical instabilities)
         def softmax_stable(x):
-            e_res = np.exp(x) - np.exp(max(x))
+            e_res = np.exp(x - np.max(x))
             return e_res / np.sum(e_res)
 
         # function to calculate normal softmax of a given array
@@ -157,19 +157,21 @@ class TwoLayerNet(object):
         # calculate softmax of class scores
         sm_results = np.zeros([N, C])
         for i in range(N):
-            sm_results[i] = softmax(scores[i])
+            sm_results[i] = softmax_stable(scores[i])
 
         # calculate L2-Norm for both weight matrices
-        l2_w1 = sum(sum(np.square(x) for x in W1))
-        l2_w2 = sum(sum(np.square(x) for x in W2))
+        l2_w1 = sum(sum(np.square(W1)))
+        l2_w2 = sum(sum(np.square(W2)))
 
-        # calculate single losses
+        # slow loss calculation (just for see what fast loss is doing)
         losses = np.zeros(N)
         for i in range(N):
-            losses[i] = - np.log(np.exp(sm_results[i, y[i]]) / sum(np.exp(sm_results[i, k]) for k in range(C)))
+            losses[i] = - np.log(sm_results[i, y[i]])
+        loss_slow = 1/N * sum(losses) + reg * (l2_w1 + l2_w2)
 
-        loss = 1/N * sum(x for x in losses) + reg * (l2_w1 + l2_w2)
-
+        # fast loss calculation
+        log_likelihood = -np.log(sm_results[range(N), y])
+        loss = 1 / N * sum(log_likelihood) + reg * (l2_w1 + l2_w2)
         #--------------------------------------- back propagation -------------------------------------------
         
         grads = {}
