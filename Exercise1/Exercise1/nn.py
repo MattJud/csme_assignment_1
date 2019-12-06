@@ -75,31 +75,42 @@ class TwoLayerNet(object):
             # in the scores variable, which should be an array of shape (N, C).
             # Start with a naive implementation with at least 2 loops.
 
-            # @All: I asked the lecturer and he said we should use 2 loops for each layer, so probably no matrix
-            #       calculation. (Freddy)
-
+            ######################################## START OF YOUR CODE ########################################
             # create output after first weights
-            x1 = np.zeros([W1.shape[1], N])           
-            for i in range(N):
-                x1[:, i] = W1.T.dot(X[i].T) + b1
+            hid_dim = W1.shape[1]
+            x1 = np.zeros([hid_dim, N])
+            w_x = np.zeros(N)  # result for multiplication of one input node with its corresponding weight
+            for i in range(N):  # loop over samples
+                for h in range(hid_dim):  # loop over hidden layer
+                    for inp in range(W1.shape[0]):  # loop over input layer
+                        w_x[inp] = W1.T[h, inp] * X[i, inp]
+                    x1[h, i] = sum(w_x) + b1[h]
             
             # apply ReLU
-            ReLU = lambda x: np.max([0,x])
-            vectorized_ReLU = np.vectorize(ReLU)
-            x1 = vectorized_ReLU(x1)
-            
-            # calculate network output (scores)
-            x2 = np.zeros([W2.shape[1], N])
-            for i in range(N):
-                x2[:, i] = W2.T.dot(x1[:, i]) + b2
-            
-            scores = x2.T
-            
+            x1 = np.maximum(x1,0)
+
+            # create output after second weights
+            out_dim = W2.shape[1]
+            output = np.zeros([out_dim, N])
+            w_x1 = np.zeros(hid_dim)  # result for multiplication of one hidden node with its corresponding weight
+            for i in range(N):  # loop over samples
+                for o in range(out_dim):  # loop over output layer
+                    for hid in range(W2.shape[0]):  # loop over hidden layer
+                        w_x1[hid] = W2[hid, o] * x1[hid, i]
+                    output[o, i] = sum(w_x1) + b2[o]
+
+            # save output in scores
+            scores = output.T
+
+            ######################################## END OF YOUR CODE ##########################################
+
         else:
             
             # Task 1.2:
             # Now implement the same forward propagation as you did above using no loops.
             # If you are done set the parameter loops to False to test your code.
+
+            ######################################## START OF YOUR CODE ########################################
 
             # create output after first weights, separately for each sample
             x1 = np.zeros([W1.shape[1], N])
@@ -116,15 +127,17 @@ class TwoLayerNet(object):
             x1 = vectorized_ReLU(x1)
 
             # calculate network output (scores), separately for each sample
-            x2 = np.zeros([W2.shape[1], N])
+            out = np.zeros([W2.shape[1], N])
 
-            x2[:, 0] = W2.T.dot(x1[:, 0]) + b2
-            x2[:, 1] = W2.T.dot(x1[:, 1]) + b2
-            x2[:, 2] = W2.T.dot(x1[:, 2]) + b2
-            x2[:, 3] = W2.T.dot(x1[:, 3]) + b2
-            x2[:, 4] = W2.T.dot(x1[:, 4]) + b2
+            out[:, 0] = W2.T.dot(x1[:, 0]) + b2
+            out[:, 1] = W2.T.dot(x1[:, 1]) + b2
+            out[:, 2] = W2.T.dot(x1[:, 2]) + b2
+            out[:, 3] = W2.T.dot(x1[:, 3]) + b2
+            out[:, 4] = W2.T.dot(x1[:, 4]) + b2
 
-            scores = x2.T
+            scores = out.T
+
+        ######################################## END OF YOUR CODE ##########################################
 
         # Jump out if y is not given.
         if y is None:
@@ -138,7 +151,9 @@ class TwoLayerNet(object):
         # Compute the loss with softmax and store it in the variable loss. Include L2 regularization for W1 and W2.
         # Make sure to handle numerical instabilities.
 
-        # @All: - see lecture 4 from slide 40
+        ######################################## START OF YOUR CODE ########################################
+
+        # TODO: @All: - see lecture 4 from slide 40
         #       - see: https://deepnotes.io/softmax-crossentropy
 
         # function to calculate a stable softmax of a given array (handle numerical instabilities)
@@ -172,6 +187,9 @@ class TwoLayerNet(object):
         # fast loss calculation
         log_likelihood = -np.log(sm_results[range(N), y])
         loss = 1 / N * sum(log_likelihood) + reg * (l2_w1 + l2_w2)
+
+        ######################################## END OF YOUR CODE ##########################################
+
         #--------------------------------------- back propagation -------------------------------------------
         
         grads = {}
