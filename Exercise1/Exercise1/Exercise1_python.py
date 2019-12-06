@@ -7,7 +7,7 @@
 # 2. Completing the Forward propagation by computing the loss
 # 3. Implementing a Back propagation
 # 4. Training the neural network
-# 
+#
 # You will implement code in 'nn.py' and test your implementations with the code provided below.
 
 # In[ ]:
