@@ -76,32 +76,25 @@ class TwoLayerNet(object):
             # Start with a naive implementation with at least 2 loops.
 
             ######################################## START OF YOUR CODE ########################################
-            # create output after first weights
-            hid_dim = W1.shape[1]
-            x1 = np.zeros([hid_dim, N])
-            w_x = np.zeros(N)  # result for multiplication of one input node with its corresponding weight
+            M, C = W2.shape
+            # first fully connected layer
+            z1 = np.zeros([N, M])
             for i in range(N):  # loop over samples
-                for h in range(hid_dim):  # loop over hidden layer
-                    for inp in range(W1.shape[0]):  # loop over input layer
-                        w_x[inp] = W1.T[h, inp] * X[i, inp]
-                    x1[h, i] = sum(w_x) + b1[h]
-            
-            # apply ReLU
-            x1 = np.maximum(x1,0)
-
-            # create output after second weights
-            out_dim = W2.shape[1]
-            output = np.zeros([out_dim, N])
-            w_x1 = np.zeros(hid_dim)  # result for multiplication of one hidden node with its corresponding weight
+                for j in range(M):  # loop over hidden layer
+                    for k in range(D):  # loop over input layer
+                        z1[i][j] += X[i][k]*W1[k][j]
+                    z1[i][j] += b1[j]  # add bias
+            # ReLU
+            z1 = np.maximum(0, z1)
+            # second fully connected layer
+            z2 = np.zeros([N, C])
             for i in range(N):  # loop over samples
-                for o in range(out_dim):  # loop over output layer
-                    for hid in range(W2.shape[0]):  # loop over hidden layer
-                        w_x1[hid] = W2[hid, o] * x1[hid, i]
-                    output[o, i] = sum(w_x1) + b2[o]
-
-            # save output in scores
-            scores = output.T
-
+                for j in range(C):  # loop over output layer
+                    for k in range(M):  # loop over hidden layer
+                        z2[i][j] += z1[i][k]*W2[k, j]
+                    z2[i][j] += b2[j]  # add bias
+            # output
+            scores = z2
             ######################################## END OF YOUR CODE ##########################################
 
         else:
