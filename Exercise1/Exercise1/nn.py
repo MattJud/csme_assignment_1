@@ -65,7 +65,7 @@ class TwoLayerNet(object):
         #--------------------------------------- forward propagation ---------------------------------------                     
         
         scores = None
-        loops = True
+        loops = False
         
         if loops == True:
             
@@ -76,8 +76,14 @@ class TwoLayerNet(object):
             # Start with a naive implementation with at least 2 loops.
         
             ######################################## START OF YOUR CODE ########################################
-
-            pass #to be replaced by your code
+            hidden_dim, output_dim = W2.shape
+            
+            z1 = np.zeros([N, hidden_dim])
+            z2 = np.zeros([N, output_dim])
+            
+            # toDo: to be completed
+            
+            #pass #to be replaced by your code
         
             ######################################## END OF YOUR CODE ##########################################
             
@@ -89,6 +95,22 @@ class TwoLayerNet(object):
         
             ######################################## START OF YOUR CODE ########################################
 
+            
+            b1 = b1.reshape(b1.shape[0],1) # make sure that it is a matrix of shape [xx,yy] and not [xx,]
+            z1 = np.dot(X, W1) + b1.T
+            a1 = np.maximum(0,z1) #Relu function
+            
+            b2 = b2.reshape(b2.shape[0],1)
+            z2 = np.dot(a1,W2) + b2.T
+            #expo = np.exp(z2)
+            #expo_sum = np.sum(np.exp(z2),axis=1 , keepdims=True)
+            #a2 = expo/expo_sum #softmax function
+            #print('expo.shape = ' , expo.shape)
+            #print('expo_sum.shape = ' , expo_sum.shape)
+            scores = z2
+            #print(a2)
+            #for i in range(N):
+                
             pass  # to be replaced by your code
         
             ######################################## END OF YOUR CODE ##########################################
@@ -100,14 +122,35 @@ class TwoLayerNet(object):
         #--------------------------------------- loss function ---------------------------------------------
         
         loss = None
-        
+      
         # Task 2:
         # Compute the loss with softmax and store it in the variable loss. Include L2 regularization for W1 and W2.
         # Make sure to handle numerical instabilities.
         
         ######################################## START OF YOUR CODE ########################################
-
-        pass  # to be replaced by your code
+        # function to calculate a stable softmax of a given array (handle numerical instabilities)
+        def softmax_stable(x):
+            e_res = np.exp(x - np.max(x))
+            return e_res / np.sum(e_res)
+            
+        # Calculate softmax
+        expo = np.exp(z2)
+        expo_sum = np.sum(np.exp(z2),axis=1 , keepdims=True)
+        prob = expo/expo_sum
+        
+        prob_stable = np.zeros([N, b2.shape[0]])
+        for i in range(N):
+            prob_stable[i] = softmax_stable(z2[i])
+            
+        #print(prob)
+        #print(prob_)
+        
+        # Calculate loss
+        log_likelihood = -np.log(prob[range(N),y])
+        #print(log_likelihood)
+        loss = np.sum(log_likelihood) / N + reg * (sum(sum(np.square(W1)))+sum(sum(np.square(W2))))
+               
+        #pass  # to be replaced by your code
         
         ######################################## END OF YOUR CODE ##########################################
 
@@ -121,7 +164,12 @@ class TwoLayerNet(object):
         
         ######################################## START OF YOUR CODE ########################################
 
-        pass  # to be replaced by your code
+        
+        #grads['W1'] = dw1
+        #grads['W2'] = dw2
+        #grads['b1'] = db1
+        #grads['b2'] = db2
+        #pass  # to be replaced by your code
 
         ######################################## END OF YOUR CODE ##########################################
 
