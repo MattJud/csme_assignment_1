@@ -225,7 +225,7 @@ class TwoLayerNet(object):
     def train(self, X, y, X_val, y_val,
               learning_rate=1e-3, learning_rate_decay=0.95,
               reg=5e-6, num_iters=100,
-              batch_size=200, verbose=False):
+              batch_size=5, verbose=False):
         """
         Train this neural network using stochastic gradient descent.
 
@@ -282,17 +282,30 @@ class TwoLayerNet(object):
             # You will need to use the gradients in the grads dictionary.
             ######################################## START OF YOUR CODE ########################################
 
-            # Forward propagation. Inputs: "X, parameters". Outputs: "A2, cache".
-            #A2, cache = forward_propagation(X, parameters)
-        
-            # Cost function. Inputs: "A2, Y, parameters". Outputs: "cost".
-            #cost = compute_cost(A2, Y, parameters)
- 
-            # Backpropagation. Inputs: "parameters, cache, X, Y". Outputs: "grads".
-            #grads = backward_propagation(parameters, cache, X, Y)
- 
-            # Gradient descent parameter update. Inputs: "parameters, grads". Outputs: "parameters".
-            #parameters = update_parameters(parameters, grads)
+            # steps:
+            # 1: Forward propagation --> cost and Loss     
+            # 2: Backpropagation. --> grad
+            # 3: Gradient descent parameter update
+            
+            # extract parameters, update them and store them again
+            dW1 = grads['W1']
+            db1 = grads['b1']
+            dW2 = grads['W2']
+            db2 = grads['b2']
+            
+            W1 = self.params['W1']
+            b1 = self.params['b1']
+            W2 = self.params['W2'] 
+            b2 = self.params['b2']
+            
+            b1 = b1.reshape(b1.shape[0],1) # make sure that it is a matrix of shape [xx,yy] and not [xx,]
+            b2 = b2.reshape(b2.shape[0],1)
+            
+            self.params['W1'] = W1 - learning_rate * dW1
+            self.params['b1'] = b1 - learning_rate * db1
+            self.params['W2'] = W2 - learning_rate * dW2
+            self.params['b2'] = b2 - learning_rate * db2
+            
 
             ######################################## END OF YOUR CODE ##########################################
 
@@ -339,6 +352,8 @@ class TwoLayerNet(object):
         # Implement this function to predict labels for the data points.
         ######################################## START OF YOUR CODE ########################################
 
+        scores = self.loss_grad(X)
+        y_pred = np.argmax(scores, axis=1)
         pass  # to be replaced by your code
 
         ######################################## END OF YOUR CODE ##########################################
