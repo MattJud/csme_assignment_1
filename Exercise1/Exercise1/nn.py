@@ -66,7 +66,7 @@ class TwoLayerNet(object):
         
         scores = None
         loops = False
-        
+        hidden_dim, output_dim = W2.shape
         if loops == True:
             
             # 1.1 Task:
@@ -76,7 +76,7 @@ class TwoLayerNet(object):
             # Start with a naive implementation with at least 2 loops.
         
             ######################################## START OF YOUR CODE ########################################
-            hidden_dim, output_dim = W2.shape
+
             
             z1 = np.zeros([N, hidden_dim])
             z2 = np.zeros([N, output_dim])
@@ -142,15 +142,16 @@ class TwoLayerNet(object):
         for i in range(N):
             prob_stable[i] = softmax_stable(z2[i])
             
-        #print(prob)
-        #print(prob_)
-        
         # Calculate loss
+        
+        #print("y.shape", y.shape)
+        #print("y = ", y)
+        #print("prob.shape", prob.shape)
         log_likelihood = -np.log(prob[range(N),y])
+        #print(prob)
         #print(log_likelihood)
+        
         loss = np.sum(log_likelihood) / N + reg * (sum(sum(np.square(W1)))+sum(sum(np.square(W2))))
-               
-        #pass  # to be replaced by your code
         
         ######################################## END OF YOUR CODE ##########################################
 
@@ -164,11 +165,57 @@ class TwoLayerNet(object):
         
         ######################################## START OF YOUR CODE ########################################
 
+        # calculate the gradient of loss regatrding to softmax cross entropy
+        # http://www.adeveloperdiary.com/data-science/deep-learning/neural-network-with-softmax-in-python/
+        dz2 = prob
+        dz2[range(N),y] -= 1
+        #dz2 = 1/N * dz2
+        #print(dz2.shape)
         
-        #grads['W1'] = dw1
-        #grads['W2'] = dw2
-        #grads['b1'] = db1
-        #grads['b2'] = db2
+        # to be deleted later
+        #print("log_likelihood.shape = ",log_likelihood.shape)
+        #dz2 = log_likelihood.reshape(log_likelihood.shape[0],1) # A2 - Y #error
+        #dz2 = np.sum(log_likelihood) / N #
+        #dz2 = prob - y.reshape
+        
+        # Notation: see Andrew Ng
+        # https://github.com/Kulbear/deep-learning-coursera/blob/master/Neural%20Networks%20and%20Deep%20Learning/Planar%20data%20classification%20with%20one%20hidden%20layer.ipynb
+        dW2 = 1/N * np.dot(a1.T, dz2)
+        db2 = 1/N * np.sum(dz2, axis=0, keepdims=True).T
+        #print("dz2.shape = ",dz2.shape)
+        #print("a1.shape = ", a1.shape)
+        #print("b2.shape = ",b2.shape)
+        #print("db2.shape = ",db2.shape)
+        #print("W2.shape = ", W2.shape)
+        #print("dW2.shape = " , dW2.shape)  
+
+
+        dz1 = np.dot(W2, dz2.T) # should still be multiplied by relu_gradient
+        #print("dz1.shape = " , dz1.shape)   
+        
+        # calculate relu gradient
+        dz1_resh = dz1.reshape(dz1.shape[0]*dz1.shape[1],1)
+        z1_resh = z1.T.reshape(z1.T.shape[0]*z1.T.shape[1],1)
+ 
+        #print("dz1_resh.shape = " , dz1_resh.shape)   
+        #print("z1_resh.shape = " , z1_resh.shape)
+        
+        dz1_resh[z1_resh < 0] = 0  # the derivetive of ReLU
+        dz1 = dz1_resh.reshape(dz1.shape[0], dz1.shape[1]) 
+        dz1 = dz1.T
+        #print("dz1.shape = " , dz1.shape) 
+        
+        dW1 = 1/N * np.dot(X.T,dz1)
+        db1 = 1/N * np.sum(dz1, axis=0, keepdims=True).T
+        #print("X.shape = ", X.shape)
+        #print("dW1.shape = ", dW1.shape)
+        #print("b1.shape = ",b1.shape)
+        #print("db1.shape = ",db1.shape)
+        
+        grads = {"W1": dW1,
+             "b1": db1,
+             "W2": dW2,
+             "b2": db2}
         #pass  # to be replaced by your code
 
         ######################################## END OF YOUR CODE ##########################################
@@ -213,7 +260,15 @@ class TwoLayerNet(object):
             # Create a random minibatch of training data X and labels y, and stor
             # them in X_batch and y_batch.
             ######################################## START OF YOUR CODE ########################################
-
+            
+            arr = np.arange(batch_size)
+            arr = np.random.permutation(arr)
+            print(X.shape[0])
+            X_batch = X[arr][:]
+            y_batch = y[arr]
+            
+            
+            
             pass  # to be replaced by your code
 
             ######################################## END OF YOUR CODE ##########################################
@@ -227,7 +282,17 @@ class TwoLayerNet(object):
             # You will need to use the gradients in the grads dictionary.
             ######################################## START OF YOUR CODE ########################################
 
-            pass  # to be replaced by your code
+            # Forward propagation. Inputs: "X, parameters". Outputs: "A2, cache".
+            #A2, cache = forward_propagation(X, parameters)
+        
+            # Cost function. Inputs: "A2, Y, parameters". Outputs: "cost".
+            #cost = compute_cost(A2, Y, parameters)
+ 
+            # Backpropagation. Inputs: "parameters, cache, X, Y". Outputs: "grads".
+            #grads = backward_propagation(parameters, cache, X, Y)
+ 
+            # Gradient descent parameter update. Inputs: "parameters, grads". Outputs: "parameters".
+            #parameters = update_parameters(parameters, grads)
 
             ######################################## END OF YOUR CODE ##########################################
 
