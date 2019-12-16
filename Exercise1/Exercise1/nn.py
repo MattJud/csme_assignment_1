@@ -193,7 +193,90 @@ class TwoLayerNet(object):
         
         ######################################## START OF YOUR CODE ########################################
 
-        pass  # to be replaced by your code
+        sm_scores = softmax_stable(scores)
+        #  upstream gradient dloss/dscores
+        dL_dsm_scores = -1 / 5 * 1 / sm_scores[range(N), y]
+        # local gradient dsm_scores/dscores
+        dsm_scores_dscores = np.zeros([N, N, C])
+        for n in range(N):
+            for i in range(N):
+                for j in range(C):
+                    if n == i:
+                        if j == y[n]:
+                            dsm_scores_dscores[n][i][j] = (np.exp(scores[n][j]) * np.sum(np.exp(scores[n])) - np.square(
+                                np.exp(scores[n][j]))) / np.square(np.sum(np.exp(scores[n])))
+                        else:
+                            dsm_scores_dscores[n][i][j] = -np.exp(scores[n][y[n]]) * np.exp(scores[n][j]) / np.square(
+                                np.sum(np.exp(scores[n])))
+                    else:
+                        dsm_scores_dscores[n][i][j] = 0
+        # upstream gradient dL_dscores
+        dL_dscores = np.zeros([N, C])
+        for n in range(N):
+            for i in range(N):
+                for j in range(C):
+                    dL_dscores[i][j] += dL_dsm_scores[n] * dsm_scores_dscores[n][i][j]
+        # local dscores/dW2
+        dscores_dW2 = np.zeros([N, C, M, C])
+        for n in range(N):
+            for i in range(C):
+                for j in range(M):
+                    for l in range(C):
+                        if i == l:
+                            dscores_dW2[n][i][j][l] = z2[n][j]
+        # upstream gradient dL/dW2
+        dL_dW2 = np.zeros([M, C])
+        for i in range(M):
+            for j in range(C):
+                for k in range(N):
+                    for l in range(C):
+                        dL_dW2[i][j] += dL_dscores[k][l] * dscores_dW2[k][l][i][j]
+        # local gradient dscors/db2
+        # dscors_db2 = np.zeros(N, C, C)
+        # upstream gradient dL/db2
+        dL_db2 = np.zeros(C)
+        for i in range(C):
+            dL_db2[i] = np.sum(dL_dscores[range(N), i])
+        # local gradient dscores/dz2
+        dscores_dz2 = np.zeros([N, C, M])
+        for n in range(N):
+            for i in range(C):
+                for j in range(M):
+                    dscores_dz2[n][i][j] = W2[j][i]
+        # upstream gradient dL/dz2
+        dL_dz2 = np.zeros([N, M])
+        for n in range(N):
+            for k in range(C):
+                dL_dz2[n] = dL_dscores[n][k] * dscores_dz2[n][k]
+        # local gradient dz2/dz1
+        dz2_dz1 = np.zeros([N, M, M])
+        for n in range(N):
+            for i in range(M):
+                for j in range(M):
+                    if z1[n][j] > 0:
+                        dz2_dz1[n][i][j] = 1
+        # upstream gradient dL/dz1
+        dL_dz1 = np.zeros([N, M])
+        for n in range(N):
+            for k in range(M):
+                dL_dz1[n] += dL_dz2[n][k] * dz2_dz1[n][k]
+        # local gradient dz1/dW1
+        dz1_dW1 = np.zeros([N, M, D, M])
+        for n in range(N):
+            for i in range(M):
+                for j in range(D):
+                    for l in range(M):
+                        if i == l:
+                            dz1_dW1[n][i][j][l] = X[n][j]
+        # upstram gradient dL/dW1
+        dL_dW1 = np.zeros([N, D, M])
+        for n in range(N):
+            for k in range(M):
+                dL_dW1[n] += dL_dz1[n][k] * dz1_dW1[n][k]
+        # upstream gradient dL/db1
+        dL_db1 = dL_dz1
+
+        grads = {'W1': dL_dW1, 'b1': dL_db1, 'W2': dL_dW2, 'b2': dL_db2}
 
         ######################################## END OF YOUR CODE ##########################################
 
