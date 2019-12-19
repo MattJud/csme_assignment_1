@@ -10,8 +10,6 @@
 #
 # You will implement code in 'nn.py' and test your implementations with the code provided below.
 
-# In[ ]:
-
 
 # This code initializes the network (see __init__ in nn.py) and some other functions needed later. 
 # The input data (X) with the associated labels (y) as well as the weights and biases 
@@ -54,8 +52,6 @@ X, y = init_data()
 # Go to 'nn.py' to implement the Forward propagation in the loss_grad function (Task 1.1 and Task 1.2).
 # Then test the code below to check your results.
 
-# In[ ]:
-
 
 scores = net.loss_grad(X)
 print('Your scores:')
@@ -81,16 +77,14 @@ print(np.sum(np.abs(scores - correct_scores)))
 # Note that 'time' is already imported in the 'nn.py' file which you can use for the time measurement. 
 
 # Duration with 2 loops:
-
+0.008005380630493164
 
 # Duration without loops:
-
+0.0
 
 # # Forwardpass loss
 # Complete the forward propagation by implementing the loss function in 'nn.py' (Task 2).
 # Run the code below to check your implementation.
-
-# In[ ]:
 
 
 loss, _ = net.loss_grad(X, y, reg=0.05)
@@ -112,8 +106,6 @@ print(np.sum(np.abs(loss - correct_loss)))
 # Now implement the Back propagation in 'nn.py' (Task 3) in the loss_grad function.
 # Test the code below to check your results.
 
-# In[ ]:
-
 
 from eval_grad import numerical_grad
 
@@ -134,9 +126,7 @@ for param_name in grads:
 # Finaly we want to train our network. For this purpose go to 'nn.py' and implement the train and predict function (Task 4.1, 4.2 and 4.3).
 # Then test the code below to check your results.
 
-# In[ ]:
-
-
+'''
 net = init_net()
 stats = net.train(X, y, X, y,
                   learning_rate=1e-1, reg=5e-6,
@@ -154,8 +144,8 @@ plt.show()
 
 # # Iterations
 # Please explain at least how many iterations are useful for training this neural network (use the plot above for your explanation)?
+'''
 
-# In[ ]:
 
 
 

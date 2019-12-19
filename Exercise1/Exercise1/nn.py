@@ -76,24 +76,30 @@ class TwoLayerNet(object):
             # Start with a naive implementation with at least 2 loops.
 
             ######################################## START OF YOUR CODE ########################################
+            # start = time.time()
+            # calculate dimensions
             M, C = W2.shape
-            # first fully connected layer
+            # fully connected layer
             z1 = np.zeros([N, M])
-            for i in range(N):  # loop over samples
-                for j in range(M):  # loop over hidden layer
-                    for k in range(D):  # loop over input layer
-                        z1[i][j] += X[i][k]*W1[k][j]
-                    z1[i][j] += b1[j]  # add bias
+            for i in range(N):
+                for j in range(M):
+                    for k in range(D):
+                        z1[i][j] += X[i][k] * W1[k][j]
+                    # add bias
+                    z1[i][j] += b1[j]
             # ReLU
-            z1 = np.maximum(0, z1)
+            a1 = np.maximum(0, z1)
             # second fully connected layer
             z2 = np.zeros([N, C])
-            for i in range(N):  # loop over samples
-                for j in range(C):  # loop over output layer
-                    for k in range(M):  # loop over hidden layer
-                        z2[i][j] += z1[i][k]*W2[k, j]
-                    z2[i][j] += b2[j]  # add bias
-            # output
+            for i in range(N):
+                for j in range(C):
+                    for k in range(M):
+                        z2[i][j] += a1[i][k] * W2[k, j]
+                    # add bias
+                    z2[i][j] += b2[j]
+            end = time.time()
+            # print('time with loops: ')
+            # print(end - start)
             scores = z2
             ######################################## END OF YOUR CODE ##########################################
 
@@ -104,32 +110,14 @@ class TwoLayerNet(object):
             # If you are done set the parameter loops to False to test your code.
 
             ######################################## START OF YOUR CODE ########################################
-
-            # create output after first weights, separately for each sample
-            x1 = np.zeros([W1.shape[1], N])
-
-            x1[:, 0] = W1.T.dot(X[0].T) + b1
-            x1[:, 1] = W1.T.dot(X[1].T) + b1
-            x1[:, 2] = W1.T.dot(X[2].T) + b1
-            x1[:, 3] = W1.T.dot(X[3].T) + b1
-            x1[:, 4] = W1.T.dot(X[4].T) + b1
-
-            # apply ReLU
-            relu = lambda x: np.max([0, x])
-            vectorized_ReLU = np.vectorize(relu)
-            x1 = vectorized_ReLU(x1)
-
-            # calculate network output (scores), separately for each sample
-            out = np.zeros([W2.shape[1], N])
-
-            out[:, 0] = W2.T.dot(x1[:, 0]) + b2
-            out[:, 1] = W2.T.dot(x1[:, 1]) + b2
-            out[:, 2] = W2.T.dot(x1[:, 2]) + b2
-            out[:, 3] = W2.T.dot(x1[:, 3]) + b2
-            out[:, 4] = W2.T.dot(x1[:, 4]) + b2
-
-            scores = out.T
-
+            # start = time.time()
+            z1 = np.dot(X, W1) + b1
+            a1 = np.maximum(0, z1)
+            z2 = np.dot(a1, W2) + b2
+            end = time.time()
+            # print('time without loop: ')
+            # print(end - start)
+            scores = z2
         ######################################## END OF YOUR CODE ##########################################
 
         # Jump out if y is not given.
@@ -146,40 +134,15 @@ class TwoLayerNet(object):
 
         ######################################## START OF YOUR CODE ########################################
 
-        # TODO: @All: - see lecture 4 from slide 40
-        #       - see: https://deepnotes.io/softmax-crossentropy
-
-        # function to calculate a stable softmax of a given array (handle numerical instabilities)
-        def softmax_stable(x):
-            e_res = np.exp(x - np.max(x))
-            return e_res / np.sum(e_res)
-
-        # function to calculate normal softmax of a given array
         def softmax(x):
-            e_res = np.exp(x)
-            return e_res / np.sum(e_res)
+            res = np.exp(x - np.max(x))
+            return res / np.sum(res)
 
-        # number of classes
-        C = b2.size
+        a2 = np.zeros(z2.shape)
+        for i in range(z2.shape[0]):
+            a2[i] = softmax(z2[i])
 
-        # calculate softmax of class scores
-        sm_results = np.zeros([N, C])
-        for i in range(N):
-            sm_results[i] = softmax_stable(scores[i])
-
-        # calculate L2-Norm for both weight matrices
-        l2_w1 = sum(sum(np.square(W1)))
-        l2_w2 = sum(sum(np.square(W2)))
-
-        # slow loss calculation (just for see what fast loss is doing)
-        losses = np.zeros(N)
-        for i in range(N):
-            losses[i] = - np.log(sm_results[i, y[i]])
-        loss_slow = 1/N * sum(losses) + reg * (l2_w1 + l2_w2)
-
-        # fast loss calculation
-        log_likelihood = -np.log(sm_results[range(N), y])
-        loss = 1 / N * sum(log_likelihood) + reg * (l2_w1 + l2_w2)
+        loss = 1 / N * np.sum(-np.log(a2[range(N), y])) + reg * np.sum(np.square(W1)) + reg * np.sum(np.square(W2))
 
         ######################################## END OF YOUR CODE ##########################################
 
@@ -193,90 +156,32 @@ class TwoLayerNet(object):
         
         ######################################## START OF YOUR CODE ########################################
 
-        sm_scores = softmax_stable(scores)
-        #  upstream gradient dloss/dscores
-        dL_dsm_scores = -1 / 5 * 1 / sm_scores[range(N), y]
-        # local gradient dsm_scores/dscores
-        dsm_scores_dscores = np.zeros([N, N, C])
-        for n in range(N):
-            for i in range(N):
-                for j in range(C):
-                    if n == i:
-                        if j == y[n]:
-                            dsm_scores_dscores[n][i][j] = (np.exp(scores[n][j]) * np.sum(np.exp(scores[n])) - np.square(
-                                np.exp(scores[n][j]))) / np.square(np.sum(np.exp(scores[n])))
-                        else:
-                            dsm_scores_dscores[n][i][j] = -np.exp(scores[n][y[n]]) * np.exp(scores[n][j]) / np.square(
-                                np.sum(np.exp(scores[n])))
-                    else:
-                        dsm_scores_dscores[n][i][j] = 0
-        # upstream gradient dL_dscores
-        dL_dscores = np.zeros([N, C])
-        for n in range(N):
-            for i in range(N):
-                for j in range(C):
-                    dL_dscores[i][j] += dL_dsm_scores[n] * dsm_scores_dscores[n][i][j]
-        # local dscores/dW2
-        dscores_dW2 = np.zeros([N, C, M, C])
-        for n in range(N):
-            for i in range(C):
-                for j in range(M):
-                    for l in range(C):
-                        if i == l:
-                            dscores_dW2[n][i][j][l] = z2[n][j]
-        # upstream gradient dL/dW2
-        dL_dW2 = np.zeros([M, C])
-        for i in range(M):
-            for j in range(C):
-                for k in range(N):
-                    for l in range(C):
-                        dL_dW2[i][j] += dL_dscores[k][l] * dscores_dW2[k][l][i][j]
-        # local gradient dscors/db2
-        # dscors_db2 = np.zeros(N, C, C)
-        # upstream gradient dL/db2
-        dL_db2 = np.zeros(C)
-        for i in range(C):
-            dL_db2[i] = np.sum(dL_dscores[range(N), i])
-        # local gradient dscores/dz2
-        dscores_dz2 = np.zeros([N, C, M])
-        for n in range(N):
-            for i in range(C):
-                for j in range(M):
-                    dscores_dz2[n][i][j] = W2[j][i]
-        # upstream gradient dL/dz2
-        dL_dz2 = np.zeros([N, M])
-        for n in range(N):
-            for k in range(C):
-                dL_dz2[n] = dL_dscores[n][k] * dscores_dz2[n][k]
-        # local gradient dz2/dz1
-        dz2_dz1 = np.zeros([N, M, M])
-        for n in range(N):
-            for i in range(M):
-                for j in range(M):
-                    if z1[n][j] > 0:
-                        dz2_dz1[n][i][j] = 1
-        # upstream gradient dL/dz1
-        dL_dz1 = np.zeros([N, M])
-        for n in range(N):
-            for k in range(M):
-                dL_dz1[n] += dL_dz2[n][k] * dz2_dz1[n][k]
-        # local gradient dz1/dW1
-        dz1_dW1 = np.zeros([N, M, D, M])
-        for n in range(N):
-            for i in range(M):
-                for j in range(D):
-                    for l in range(M):
-                        if i == l:
-                            dz1_dW1[n][i][j][l] = X[n][j]
-        # upstram gradient dL/dW1
-        dL_dW1 = np.zeros([N, D, M])
-        for n in range(N):
-            for k in range(M):
-                dL_dW1[n] += dL_dz1[n][k] * dz1_dW1[n][k]
-        # upstream gradient dL/db1
-        dL_db1 = dL_dz1
+        dL_dz2 = a2
+        dL_dz2[range(N), y] -= 1
 
-        grads = {'W1': dL_dW1, 'b1': dL_db1, 'W2': dL_dW2, 'b2': dL_db2}
+        dz2_dw2 = a1
+
+        dL_dw2 = 1 / N * np.dot(dz2_dw2.T, dL_dz2)
+
+        dL_db2 = np.zeros(b2.shape[0])
+        for i in range(b2.shape[0]):
+            dL_db2[i] = np.mean(dL_dz2[range(N), i])
+
+        def reluDerivative(x):
+            x[x <= 0] = 0
+            x[x > 0] = 1
+            return x
+
+        dL_dz1 = np.dot(W2, dL_dz2.T) * reluDerivative(z1.T)
+
+        dL_dw1 = 1 / N * np.dot(dL_dz1, X)
+        dL_dw1 = dL_dw1.T
+
+        dL_db1 = np.zeros(b1.shape[0])
+        for i in range(b1.shape[0]):
+            dL_db1[i] = np.mean(dL_dz1.T[range(N), i])
+
+        grads = {'W1': dL_dw1, 'b1': dL_db1, 'W2': dL_dw2, 'b2': dL_db2}
 
         ######################################## END OF YOUR CODE ##########################################
 
