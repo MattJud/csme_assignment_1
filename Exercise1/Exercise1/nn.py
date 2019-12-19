@@ -158,14 +158,11 @@ class TwoLayerNet(object):
 
         dL_dz2 = a2
         dL_dz2[range(N), y] -= 1
+        dL_dz2 /= N
 
-        dz2_dw2 = a1
+        dL_dw2 = np.dot(a1.T, dL_dz2)
 
-        dL_dw2 = 1 / N * np.dot(dz2_dw2.T, dL_dz2)
-
-        dL_db2 = np.zeros(b2.shape[0])
-        for i in range(b2.shape[0]):
-            dL_db2[i] = np.mean(dL_dz2[range(N), i])
+        dL_db2 = np.sum(dL_dz2, axis=0)
 
         def reluDerivative(x):
             x[x <= 0] = 0
@@ -174,14 +171,15 @@ class TwoLayerNet(object):
 
         dL_dz1 = np.dot(W2, dL_dz2.T) * reluDerivative(z1.T)
 
-        dL_dw1 = 1 / N * np.dot(dL_dz1, X)
-        dL_dw1 = dL_dw1.T
+        dL_dw1 = np.dot(dL_dz1, X)
 
-        dL_db1 = np.zeros(b1.shape[0])
-        for i in range(b1.shape[0]):
-            dL_db1[i] = np.mean(dL_dz1.T[range(N), i])
+        dL_db1 = np.sum(dL_dz1.T, axis=0)
 
-        grads = {'W1': dL_dw1, 'b1': dL_db1, 'W2': dL_dw2, 'b2': dL_db2}
+        dL_dw1 += reg * 2 * W1.T
+
+        dL_dw2 += reg * 2 * W2
+
+        grads = {'W1': dL_dw1.T, 'b1': dL_db1, 'W2': dL_dw2, 'b2': dL_db2}
 
         ######################################## END OF YOUR CODE ##########################################
 
