@@ -226,7 +226,9 @@ class TwoLayerNet(object):
             # them in X_batch and y_batch.
             ######################################## START OF YOUR CODE ########################################
 
-            pass  # to be replaced by your code
+            batch_indices = np.random.choice(num_train, batch_size)
+            X_batch = X[batch_indices]
+            y_batch = y[batch_indices]
 
             ######################################## END OF YOUR CODE ##########################################
 
@@ -239,7 +241,8 @@ class TwoLayerNet(object):
             # You will need to use the gradients in the grads dictionary.
             ######################################## START OF YOUR CODE ########################################
 
-            pass  # to be replaced by your code
+            for key in self.params:
+                self.params[key] -= learning_rate * grads[key]
 
             ######################################## END OF YOUR CODE ##########################################
 
@@ -286,7 +289,7 @@ class TwoLayerNet(object):
         # Implement this function to predict labels for the data points.
         ######################################## START OF YOUR CODE ########################################
 
-        pass  # to be replaced by your code
+        y_pred = np.argmax(self.loss_grad(X), axis=1)
 
         ######################################## END OF YOUR CODE ##########################################
 

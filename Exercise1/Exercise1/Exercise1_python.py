@@ -126,7 +126,6 @@ for param_name in grads:
 # Finaly we want to train our network. For this purpose go to 'nn.py' and implement the train and predict function (Task 4.1, 4.2 and 4.3).
 # Then test the code below to check your results.
 
-'''
 net = init_net()
 stats = net.train(X, y, X, y,
                   learning_rate=1e-1, reg=5e-6,
@@ -144,7 +143,7 @@ plt.show()
 
 # # Iterations
 # Please explain at least how many iterations are useful for training this neural network (use the plot above for your explanation)?
-'''
+
 
 
 
