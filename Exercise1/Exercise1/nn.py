@@ -114,7 +114,7 @@ class TwoLayerNet(object):
             z1 = np.dot(X, W1) + b1
             a1 = np.maximum(0, z1)
             z2 = np.dot(a1, W2) + b2
-            end = time.time()
+            # end = time.time()
             # print('time without loop: ')
             # print(end - start)
             scores = z2
