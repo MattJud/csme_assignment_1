@@ -76,7 +76,7 @@ class TwoLayerNet(object):
             # Start with a naive implementation with at least 2 loops.
 
             ######################################## START OF YOUR CODE ########################################
-            # start = time.time()
+            start = time.time()
             # calculate dimensions
             M, C = W2.shape
             # fully connected layer
@@ -95,9 +95,9 @@ class TwoLayerNet(object):
                     z2[i][j] = np.sum(a1[i, range(M)] * W2[range(M), j])
                     # add bias
                     z2[i][j] += b2[j]
-            # end = time.time()
-            # print('time with loops: ')
-            # print(end - start)
+            end = time.time()
+            print('time with loops: ')
+            print(end - start)
             scores = z2
             #0.01701664924621582
             ######################################## END OF YOUR CODE ##########################################
