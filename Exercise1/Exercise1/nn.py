@@ -83,8 +83,7 @@ class TwoLayerNet(object):
             z1 = np.zeros([N, M])
             for i in range(N):
                 for j in range(M):
-                    for k in range(D):
-                        z1[i][j] += X[i][k] * W1[k][j]
+                    z1[i][j] = np.sum(X[i, range(D)]*W1[range(D), j])
                     # add bias
                     z1[i][j] += b1[j]
             # ReLU
@@ -93,14 +92,14 @@ class TwoLayerNet(object):
             z2 = np.zeros([N, C])
             for i in range(N):
                 for j in range(C):
-                    for k in range(M):
-                        z2[i][j] += a1[i][k] * W2[k, j]
+                    z2[i][j] = np.sum(a1[i, range(M)] * W2[range(M), j])
                     # add bias
                     z2[i][j] += b2[j]
-            end = time.time()
+            # end = time.time()
             # print('time with loops: ')
             # print(end - start)
             scores = z2
+            #0.01701664924621582
             ######################################## END OF YOUR CODE ##########################################
 
         else:
